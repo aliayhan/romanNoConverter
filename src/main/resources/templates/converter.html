@@ -1,0 +1,99 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<link
+	href="http://cdn.jsdelivr.net/webjars/bootstrap/3.3.7/css/bootstrap.min.css"
+	th:href="@{/webjars/bootstrap/3.3.7/css/bootstrap.min.css}"
+	rel="stylesheet" media="screen" />
+
+<link th:href="@{/css/main.css}" href="/css/main.css" rel="stylesheet"
+	type="text/css" />
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"
+	th:src="@{/webjars/jquery/3.1.1/jquery.js}"></script>
+
+<title>Roman No Converter</title>
+
+<!-- TODO: Make this JS more flexible and put it in an external file -->
+<script type="text/javascript">
+	function ajaxConvertValue() {
+		var $form = $('#form');
+		var $result = $('#resultsBlock');
+		$.ajax({
+			url : 'converter',
+			type : 'post',
+			data : $form.serialize(),
+			success : function(response) {
+				// If response contains resultsBlock -> Result should be displayed
+				if (response.includes('resultsBlock')) {
+					$result.replaceWith(response);
+				}
+				// Else show form errors
+				else {
+					$form.replaceWith(response);
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+
+				<form th:fragment="formFragment" id="form" class="form-vertical"
+					action="javascript:ajaxConvertValue()" th:object="${converterForm}">
+					<fieldset>
+						<div id="legend">
+							<legend th:text="#{converter.desc}">[Convert some
+								decimals]</legend>
+						</div>
+
+						<div class="alert alert-danger" th:if="*{showUnsuccessfulMsg}">
+							<strong><span th:text="#{error}">[Error]</span></strong> <span
+								th:text="#{error.nan}">[NaN]</span>
+						</div>
+
+						<div class="control-group">
+							<label class="control-label" for="decimalNumber"
+								th:text="#{converter.decimalNumber}">[Decimal]</label>
+							<div class="controls">
+								<input type="text" id="decimalNumber" name="decimalNumber"
+									class="form-control input-lg" th:value="*{decimalNumber}" />
+							</div>
+							<span class="control-label"
+								th:if="${#fields.hasErrors('decimalNumber')}"
+								th:errors="*{decimalNumber}">[Decimal input error]</span>
+						</div>
+						<br />
+						<div class="control-group">
+							<div class="controls">
+								<button type="submit" class="btn btn-success"
+									th:text="#{converter.convert}">[Convert]</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+
+				<br />
+				<div th:fragment="formResultFragment" id="resultsBlock"
+					class="control-group" th:object="${converterForm}">
+
+
+					<div class="form-group">
+						<label class="control-label" for="romanNumber"
+							th:text="#{converter.romanNumber}">[Roman]</label>
+						<textarea id="romanNumber" name="romanNumber" class="form-control"
+							rows="5" th:field="*{romanNumber}" disabled="disabled"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3"></div>
+		</div>
+	</div>
+</body>
+</html>
